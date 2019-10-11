@@ -8,16 +8,18 @@ const Product = require("./../models/product");
 router.get("/", (req, res, next) => {
   Order.find()
     .select("_id productId quantity")
+    .populate('productId', 'name')
     .exec()
     .then(docs => {
       res.status(200).json({
         count: docs.length,
         orders: docs.map(doc => {
+          console.log(doc.productId.id)
           return {
             ...doc._doc,
             request: {
               type: "GET",
-              url: "http://localhost:3000/products/" + doc.productId,
+              url: "http://localhost:3000/products/" + doc.productId.id,
             },
           };
         }),
@@ -65,6 +67,7 @@ router.get("/:orderId", (req, res, next) => {
 
   Order.findById(id)
     .select('id quantity productId')
+    .populate('productId')
     .exec()
     .then(order => {
       if(!order) {
